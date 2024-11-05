@@ -18,13 +18,38 @@ class SpotifyController:
         return sp
 
     def play_song(self):
-        self.sp.start_playback()
-        print("Song is now playing.")
+        try:
+            self.sp.start_playback()
+            print("Song is now playing.")
+        except spotipy.exceptions.SpotifyException as e:
+            print(f"Error playing song: {e}")
 
     def pause_song(self):
-        self.sp.pause_playback()
-        print("Song is now paused.")
+        try:
+            current_playback = self.sp.current_playback()
+            if current_playback is None or not current_playback['is_playing']:
+                print("No active playback session found.")
+                return
+            
+            self.sp.pause_playback()
+            print("Playback paused.")
+        except spotipy.exceptions.SpotifyException as e:
+            print(f"Error pausing song: {e}")
 
     def skip_song(self):
-        self.sp.next_track()
-        print("Song skipped.")
+        try:
+            self.sp.next_track()
+            print("Song skipped.")
+        except spotipy.exceptions.SpotifyException as e:
+            print(f"Error skipping song: {e}")
+
+    def list_devices(self):
+        # Get the available devices
+        devices = self.sp.devices()
+        
+        if devices['devices']:
+            print("Available devices:")
+            for device in devices['devices']:
+                print(f"Name: {device['name']}, Type: {device['type']}, ID: {device['id']}, Is Active: {device['is_active']}")
+        else:
+            print("No available devices found.")

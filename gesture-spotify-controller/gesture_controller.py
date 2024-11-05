@@ -24,16 +24,14 @@ class GestureController:
     def detect_gestures(self):
         cap = cv2.VideoCapture(0)
         
-        # Use Holistic model for full-body landmarks (including hands)
         with self.mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-            # Use FaceMesh model for detailed face landmarks
             with self.mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
                 while cap.isOpened():
                     ret, frame = cap.read()
                     if not ret:
                         break
 
-                    # Process image for both hand and face landmarks
+                    # Process image
                     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     image.flags.writeable = False
                     holistic_results = holistic.process(image)
@@ -42,17 +40,13 @@ class GestureController:
                     image.flags.writeable = True
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-                    # Draw hand and pose landmarks from Holistic model
+                    # Draw landmarks
                     self._draw_holistic_landmarks(image, holistic_results)
-
-                    # Draw face landmarks from FaceMesh model
                     self._draw_face_landmarks(image, face_results)
 
-                    # Detect hand gestures for wave and play/pause
-                    self._process_wave(holistic_results, frame)
+                    # Process gestures
+                    self._process_wave(holistic_results)
                     self._process_play_pause(holistic_results)
-
-                    # Detect facial gesture to skip song on smile
                     self._process_face_gestures(face_results)
 
                     cv2.imshow('Gesture Control', image)
@@ -64,82 +58,77 @@ class GestureController:
         cv2.destroyAllWindows()
 
     def _draw_holistic_landmarks(self, image, results):
-        """Draws holistic landmarks for hands and pose."""
+        """Draws the holistic landmarks on the image."""
         if results.left_hand_landmarks:
             self.mp_drawing.draw_landmarks(image, results.left_hand_landmarks, self.mp_holistic.HAND_CONNECTIONS)
+
         if results.right_hand_landmarks:
             self.mp_drawing.draw_landmarks(image, results.right_hand_landmarks, self.mp_holistic.HAND_CONNECTIONS)
+
         if results.pose_landmarks:
             self.mp_drawing.draw_landmarks(image, results.pose_landmarks, self.mp_holistic.POSE_CONNECTIONS)
 
     def _draw_face_landmarks(self, image, results):
-        """Draws face landmarks using FaceMesh model."""
+        """Draws the face landmarks on the image."""
         if results.multi_face_landmarks:
-            for face_landmarks in results.multi_face_landmarks:
+         for face_landmarks in results.multi_face_landmarks:
+            if hasattr(self.mp_face_mesh, 'FACE_CONNECTIONS'):
+                self.mp_drawing.draw_landmarks(image, face_landmarks, self.mp_face_mesh.FACE_CONNECTIONS)
+            else:
                 self.mp_drawing.draw_landmarks(image, face_landmarks, self.mp_face_mesh.FACEMESH_TESSELATION)
+                
 
-    def _process_wave(self, results, frame):
+    def _process_wave(self, results):
         """Detects a wave gesture to skip the song."""
-        if results.left_hand_landmarks or results.right_hand_landmarks:
-            hand_landmarks = results.left_hand_landmarks if results.left_hand_landmarks else results.right_hand_landmarks
+        hand_landmarks = (results.left_hand_landmarks or results.right_hand_landmarks)
+
+        if hand_landmarks:
+            wrist_x = hand_landmarks.landmark[self.mp_holistic.HandLandmark.WRIST].x
             
-            if hand_landmarks:
-                wrist_x = hand_landmarks.landmark[self.mp_holistic.HandLandmark.WRIST].x
-                
-                # If this is the first detection or after a reset, set the previous wrist position
-                if self.previous_wrist_x is None:
-                    self.previous_wrist_x = wrist_x
-                
-                # Check if the wrist has moved significantly to the left or right
-                if abs(wrist_x - self.previous_wrist_x) > self.wave_threshold:
-                    if time.time() - self.last_wave_time > self.wave_reset_time:
-                        # Increment wave count based on the direction of movement
-                        if wrist_x > self.previous_wrist_x:
-                            print("Wave detected - skipping song")
-                            self.spotify_controller.skip_song()  # Skip the song
-                        self.last_wave_time = time.time()  # Reset the last wave time
-                    self.previous_wrist_x = wrist_x  # Update previous wrist position
+            if self.previous_wrist_x is None:
+                self.previous_wrist_x = wrist_x
+            
+            if abs(wrist_x - self.previous_wrist_x) > self.wave_threshold:
+                if time.time() - self.last_wave_time > self.wave_reset_time:
+                    if wrist_x > self.previous_wrist_x:
+                        print("Wave detected - skipping song")
+                        self.spotify_controller.skip_song()
+                    self.last_wave_time = time.time()
+                self.previous_wrist_x = wrist_x
 
     def _process_play_pause(self, results):
         """Detects play/pause gesture based on hand position."""
-        if results.left_hand_landmarks or results.right_hand_landmarks:
-            hand_landmarks = results.left_hand_landmarks if results.left_hand_landmarks else results.right_hand_landmarks
-            
-            if hand_landmarks:
-                index_finger_tip = hand_landmarks.landmark[self.mp_holistic.HandLandmark.INDEX_FINGER_TIP]
-                thumb_tip = hand_landmarks.landmark[self.mp_holistic.HandLandmark.THUMB_TIP]
+        hand_landmarks = (results.left_hand_landmarks or results.right_hand_landmarks)
 
-                # Calculate distance between index finger tip and thumb tip
-                distance = ((index_finger_tip.x - thumb_tip.x) ** 2 + (index_finger_tip.y - thumb_tip.y) ** 2) ** 0.5
+        if hand_landmarks:
+            index_finger_tip = hand_landmarks.landmark[self.mp_holistic.HandLandmark.INDEX_FINGER_TIP]
+            thumb_tip = hand_landmarks.landmark[self.mp_holistic.HandLandmark.THUMB_TIP]
+
+            distance = ((index_finger_tip.x - thumb_tip.x) ** 2 + (index_finger_tip.y - thumb_tip.y) ** 2) ** 0.5
+            
+            if distance < 0.1:  # Adjust the threshold as needed
+                if self.currently_playing:
+                    print("Play/Pause gesture detected - pausing song")
+                    self.spotify_controller.pause_song()
+                else:
+                    print("Play/Pause gesture detected - playing song")
+                    self.spotify_controller.play_song()
                 
-                # Define a threshold for play/pause detection
-                if distance < 0.1:  # Adjust the threshold as needed
-                    if self.currently_playing:
-                        print("Play/Pause gesture detected - pausing song")
-                        self.spotify_controller.pause_song()  # Pause the song
-                    else:
-                        print("Play/Pause gesture detected - playing song")
-                        self.spotify_controller.play_song()  # Play the song
-                    
-                    # Toggle the playing state
-                    self.currently_playing = not self.currently_playing
+                self.currently_playing = not self.currently_playing
 
     def _process_face_gestures(self, results):
         """Detects smile as a facial gesture to skip songs."""
         if results.multi_face_landmarks:
-            face_landmarks = results.multi_face_landmarks[0]  # Assuming single face detection
+            face_landmarks = results.multi_face_landmarks[0]
 
-            # Define specific landmark indices for mouth corners and lip center
             left_mouth_corner = face_landmarks.landmark[61]
             right_mouth_corner = face_landmarks.landmark[291]
             upper_lip_center = face_landmarks.landmark[13]
             lower_lip_center = face_landmarks.landmark[14]
 
-            # Calculate smile width and height
             smile_width = abs(right_mouth_corner.x - left_mouth_corner.x)
             smile_height = abs(upper_lip_center.y - lower_lip_center.y)
 
-            # Check if the smile height-to-width ratio indicates a smile
-            if smile_height / smile_width > 0.3:  # Adjust as needed for smile sensitivity
+            if smile_height / smile_width > 0.3:  # Adjust as needed
                 print("Smile detected - skipping song")
                 self.spotify_controller.skip_song()

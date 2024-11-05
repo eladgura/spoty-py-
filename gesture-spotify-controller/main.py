@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # Create an instance of the SpotifyController
     spotify_controller = SpotifyController(client_id, client_secret, redirect_uri)
-
+    spotify_controller.list_devices()
     # Create an instance of the GestureController with the SpotifyController
     gesture_controller = GestureController(spotify_controller)
 
