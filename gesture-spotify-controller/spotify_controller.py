@@ -1,5 +1,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.exceptions import SpotifyException
 
 class SpotifyController:
     def __init__(self, client_id, client_secret, redirect_uri):
@@ -10,43 +11,52 @@ class SpotifyController:
         self.sp = self.authenticate()
 
     def authenticate(self):
-        # Authenticate with Spotify using Spotipy
-        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=self.client_id,
-                                                       client_secret=self.client_secret,
-                                                       redirect_uri=self.redirect_uri,
-                                                       scope=self.scope))
-        return sp
+        return spotipy.Spotify(auth_manager=SpotifyOAuth(
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            redirect_uri=self.redirect_uri,
+            scope=self.scope
+        ))
 
     def play_song(self):
+        """Starts/resumes playback on the active device."""
         try:
             self.sp.start_playback()
             print("Song is now playing.")
-        except spotipy.exceptions.SpotifyException as e:
+        except SpotifyException as e:
             print(f"Error playing song: {e}")
 
     def pause_song(self):
+        """Pauses playback if there is an active session."""
         try:
-            current_playback = self.sp.current_playback()
-            if current_playback is None or not current_playback['is_playing']:
+            if self.is_playing():
+                self.sp.pause_playback()
+                print("Playback paused.")
+            else:
                 print("No active playback session found.")
-                return
-            
-            self.sp.pause_playback()
-            print("Playback paused.")
-        except spotipy.exceptions.SpotifyException as e:
+        except SpotifyException as e:
             print(f"Error pausing song: {e}")
 
     def skip_song(self):
+        """Skips to the next track."""
         try:
             self.sp.next_track()
             print("Song skipped.")
-        except spotipy.exceptions.SpotifyException as e:
+        except SpotifyException as e:
             print(f"Error skipping song: {e}")
 
+    def is_playing(self):
+        """Checks if there is an active playback session."""
+        try:
+            playback = self.sp.current_playback()
+            return playback is not None and playback.get('is_playing', False)
+        except SpotifyException as e:
+            print(f"Error checking playback state: {e}")
+            return False
+
     def list_devices(self):
-        # Get the available devices
+        """Lists available devices."""
         devices = self.sp.devices()
-        
         if devices['devices']:
             print("Available devices:")
             for device in devices['devices']:
