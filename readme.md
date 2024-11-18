@@ -72,5 +72,4 @@ No active playback device found: Open Spotify on your phone, computer, or anothe
 Gestures not recognized: Ensure proper lighting and keep your hands in view of the webcam.
 Additional Resources
 Spotify Developer Dashboard: https://developer.spotify.com/dashboard/applications
-MediaPipe Documentation: https://google.github.io/mediapipe/
 Feel free to fork this project or raise an issue if you encounter any problems! 
