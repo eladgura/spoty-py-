@@ -25,8 +25,8 @@ class MainProgram:
     def run_main_program(self):
         """Runs the main program after successful login."""
         # Define your Spotify API credentials.
-        client_id = "c0a8899afb05400093bdebff2013aee6"
-        client_secret = "fa8e33c10c9d43f28f9f58889e250274"
+        client_id = "xxxxx"
+        client_secret = "xxxxx"
         redirect_uri = "http://localhost:8888/callback"
 
         # Create an instance of the SpotifyController.
