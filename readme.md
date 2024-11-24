@@ -1,74 +1,75 @@
-#!/bin/bash
+Gesture Spotify Controller Setup Script
+Introduction
+Welcome to the Gesture Spotify Controller! This script automates the setup process for using gestures to control Spotify playback. You’ll be able to skip tracks and toggle play/pause with simple hand gestures detected via your webcam. Let’s get started!
 
-############################################################
-#          Gesture Spotify Controller Setup Script         #
-# Automates setup for the Gesture Spotify Controller,      #
-# including dependencies, Spotify API configuration,       #
-# and running the program.                                 #
-############################################################
+Setup Instructions
+Step 1: Clone the Repository
+The first step is to download the Gesture Spotify Controller's code. Open your terminal and run the following commands:
 
-# Step 1: Clone the repository
-echo "Step 1: Cloning the repository..."
 git clone https://github.com/your-repo-name/gesture-spotify-controller.git
-cd gesture-spotify-controller || { echo "Failed to navigate to the project directory! Exiting."; exit 1; }
-echo "Repository cloned successfully!"
+cd gesture-spotify-controller
+Step 2: Install Dependencies
+Make sure you have Python installed (version 3.8 or later). Then, install the necessary Python packages by running:
 
-# Step 2: Install dependencies
-echo "Step 2: Installing dependencies..."
-pip install -r requirements.txt || { echo "Failed to install dependencies! Exiting."; exit 1; }
-echo "Dependencies installed successfully!"
+pip install -r requirements.txt
+Spotify API Configuration
+Spotify’s API lets this program control playback, but you’ll need to set up an app on the Spotify Developer Dashboard first.
 
-# Step 3: Spotify API Setup Instructions
-echo "Step 3: Setting up Spotify API credentials..."
-echo "Complete the following steps manually:"
-echo "1. Visit https://developer.spotify.com/dashboard/applications."
-echo "2. Create an app with the following details:"
-echo "   - App Name: Gesture Spotify Controller"
-echo "   - App Description: Application to control Spotify playback using gestures."
-echo "3. Add the Redirect URI: http://localhost:8000/callback/."
-echo "4. Copy the Client ID and Client Secret."
-read -p "Press Enter once you've completed Spotify API setup..."
+Go to the Spotify Developer Dashboard and log in with your Spotify account.
+Click Create an App, then fill in these details:
+App Name: Gesture Spotify Controller
+App Description: Application to control Spotify playback using gestures.
+Add a Redirect URI under your app settings:
 
-# Step 4: Configure Spotify Credentials
+http://localhost:8000/callback/
+Save your app. Copy the Client ID and Client Secret shown on your app dashboard.
+When ready, return to your terminal and run:
+
 read -p "Enter your Spotify Client ID: " client_id
 read -p "Enter your Spotify Client Secret: " client_secret
-echo "Configuring Spotify credentials..."
-sed -i "s/your-client-id/$client_id/" spotify_controller.py
-sed -i "s/your-client-secret/$client_secret/" spotify_controller.py
-sed -i "s|http://localhost:8000/callback|http://localhost:8000/callback|" spotify_controller.py
-echo "Spotify credentials configured successfully!"
+These credentials will be automatically added to the program.
 
-# Notes and Gesture Information
-echo "==========================================================="
-echo "Notes:"
-echo "- A Spotify Premium account is required for playback control."
-echo "- Ensure your webcam is working and placed in proper lighting for gesture detection."
-echo "- Login and Registration:"
-echo "  * On startup, the application will ask you to register or log in."
-echo "  * To register: Look at the webcam to capture your face data and confirm."
-echo "  * To log in: Look at the webcam to verify your face."
-echo "  * To exit the login/registration process, press 'q'."
-echo "- Gesture Controls:"
-echo "  * Wave Gesture (Right Hand): Skips to the next track."
-echo "    Perform by moving your right hand left and right quickly."
-echo "  * Thumb-Index Pinch Gesture (Left Hand): Toggles play/pause."
-echo "    Perform by pinching and releasing your thumb and index finger."
-echo "- To exit the program at any time, press the 'Q' key."
-echo "==========================================================="
+Gesture Controls
+Once set up, the Gesture Spotify Controller uses these gestures to control playback:
 
-# Troubleshooting Information
-echo "Troubleshooting:"
-echo "1. If no active playback device is found:"
-echo "   - Open Spotify and start playing on any device before running the program."
-echo "2. If gestures are not recognized:"
-echo "   - Ensure proper lighting and keep hands within the webcam's field of view."
-echo "   - Adjust hand positions for better detection."
-echo "3. If authentication issues occur:"
-echo "   - Ensure Client ID, Client Secret, and Redirect URI are correct."
-echo "   - Confirm the Redirect URI is added in the Spotify Developer Dashboard."
-echo "==========================================================="
+Wave Gesture (Right Hand):
 
-# Step 5: Run the application
-echo "Step 5: Running the application..."
-python main.py || { echo "Failed to run the application! Check your setup and try again."; exit 1; }
-echo "Application is running! Follow on-screen instructions."
+Action: Skips to the next track.
+How to Perform: Move your right hand left and right quickly in front of the webcam.
+Thumb-Index Pinch Gesture (Left Hand):
+
+Action: Toggles play/pause.
+How to Perform: Pinch your thumb and index finger together, then release.
+Login and Registration
+On startup, you’ll be prompted to either register or log in:
+
+To Register:
+Face the webcam to capture your face data and confirm registration.
+To Log In:
+Face the webcam to verify your identity using stored face data.
+To Exit:
+Press q to quit the process anytime.
+Notes
+Spotify Premium: A Spotify Premium account is required for playback controls.
+Webcam Setup: Ensure your webcam is working properly and has good lighting for gesture detection.
+Exiting the Program: Press Q while the webcam feed is active to quit.
+Troubleshooting
+No Active Playback Device Found
+
+Open Spotify on your phone, computer, or another device and start playing music before using this application.
+Gestures Not Recognized
+
+Ensure your hands are clearly visible to the webcam.
+Use proper lighting, and keep your hands within the webcam’s field of view.
+Authentication Issues
+
+Double-check the Client ID, Client Secret, and Redirect URI you entered.
+Verify the Redirect URI is listed in your Spotify Developer App settings.
+Running the Program
+After completing the setup, launch the Gesture Spotify Controller:
+
+python main.py
+The program will start, and you can follow the on-screen instructions.
+
+Enjoy Your Gesture-Controlled Spotify Experience!
+If you have any issues, consult the troubleshooting section or visit the Spotify Developer Documentation. Happy listening!
