@@ -2,8 +2,8 @@
 
 # Gesture Spotify Controller Setup Script
 # =======================================
-# Automates setup for the Gesture Spotify Controller, including dependencies,
-# Spotify API configuration, and running the program.
+ Automates setup for the Gesture Spotify Controller, including dependencies,
+ Spotify API configuration, and running the program.
 
 # Step 1: Clone the repository
 git clone https://github.com/your-repo-name/gesture-spotify-controller.git
