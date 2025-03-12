@@ -6,7 +6,7 @@ Setup Instructions
 Step 1: Clone the Repository
 The first step is to download the Gesture Spotify Controller's code. Open your terminal and run the following commands:
 
-git clone https://github.com/your-repo-name/gesture-spotify-controller.git
+git clone https://github.com/eladgura/spoty-py-?tab=readme-ov-file
 cd gesture-spotify-controller
 Step 2: Install Dependencies
 Make sure you have Python installed (version 3.8 or later). Then, install the necessary Python packages by running:
