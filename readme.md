@@ -15,7 +15,7 @@ pip install -r requirements.txt
 Spotify API Configuration
 Spotify’s API lets this program control playback, but you’ll need to set up an app on the Spotify Developer Dashboard first.
 
-Go to the Spotify Developer Dashboard and log in with your Spotify account.
+Go to the https://developer.spotify.com/ and log in with your Spotify account.
 Click Create an App, then fill in these details:
 App Name: Gesture Spotify Controller
 App Description: Application to control Spotify playback using gestures.
